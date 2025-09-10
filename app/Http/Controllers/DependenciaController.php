@@ -9,19 +9,10 @@ class DependenciaController extends Controller
 {
     public function index()
     {
-        $dependencias = Dependencia::activas()
-            ->withCount('proyectosServicioSocial')
-            ->orderBy('nombre_dependencia')
-            ->paginate(15);
+        $dependencias = Dependencia::orderBy('nombre')  // CORREGIDO: era 'nombre_dependencia'
+            ->paginate(10);
         
         return view('dependencias.index', compact('dependencias'));
-    }
-
-    public function show(Dependencia $dependencia)
-    {
-        $dependencia->load(['proyectosServicioSocial.estudiante']);
-        
-        return view('dependencias.show', compact('dependencia'));
     }
 
     public function create()
@@ -32,21 +23,32 @@ class DependenciaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre_dependencia' => 'required|string|max:200',
-            'domicilio_dependencia' => 'required|string',
-            'titular_dependencia' => 'required|string|max:150',
-            'cargo_titular' => 'required|string|max:150',
-            'responsable_proyecto' => 'required|string|max:150',
-            'cargo_responsable' => 'required|string|max:150',
+            'nombre' => 'required|string|max:255',  // CORREGIDO: era 'nombre_dependencia'
+            'domicilio' => 'required|string',
+            'titular' => 'required|string|max:150',
+            'cargo_titular' => 'required|string|max:100',
+            'responsable' => 'nullable|string|max:150',
+            'cargo_responsable' => 'nullable|string|max:100',
+            'telefono' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:100',
             'municipio' => 'required|string|max:100',
             'estado' => 'required|string|max:100',
-            'activa' => 'boolean',
+            'activa' => 'boolean'
         ]);
 
         $dependencia = Dependencia::create($validated);
 
-        return redirect()->route('dependencias.show', $dependencia)
-            ->with('success', 'Dependencia registrada exitosamente.');
+        return redirect()->route('dependencias.index')
+            ->with('success', 'Dependencia creada exitosamente.');
+    }
+
+    public function show(Dependencia $dependencia)
+    {
+        $proyectos = $dependencia->proyectosServicioSocial()
+            ->with('estudiante')
+            ->paginate(10);
+            
+        return view('dependencias.show', compact('dependencia', 'proyectos'));
     }
 
     public function edit(Dependencia $dependencia)
@@ -57,30 +59,30 @@ class DependenciaController extends Controller
     public function update(Request $request, Dependencia $dependencia)
     {
         $validated = $request->validate([
-            'nombre_dependencia' => 'required|string|max:200',
-            'domicilio_dependencia' => 'required|string',
-            'titular_dependencia' => 'required|string|max:150',
-            'cargo_titular' => 'required|string|max:150',
-            'responsable_proyecto' => 'required|string|max:150',
-            'cargo_responsable' => 'required|string|max:150',
+            'nombre' => 'required|string|max:255',  // CORREGIDO: era 'nombre_dependencia'
+            'domicilio' => 'required|string',
+            'titular' => 'required|string|max:150',
+            'cargo_titular' => 'required|string|max:100',
+            'responsable' => 'nullable|string|max:150',
+            'cargo_responsable' => 'nullable|string|max:100',
+            'telefono' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:100',
             'municipio' => 'required|string|max:100',
             'estado' => 'required|string|max:100',
-            'activa' => 'boolean',
+            'activa' => 'boolean'
         ]);
 
         $dependencia->update($validated);
 
-        return redirect()->route('dependencias.show', $dependencia)
-            ->with('success', 'Información de la dependencia actualizada exitosamente.');
+        return redirect()->route('dependencias.index')
+            ->with('success', 'Dependencia actualizada exitosamente.');
     }
 
     public function destroy(Dependencia $dependencia)
     {
-        // En lugar de eliminar, desactivamos la dependencia si tiene proyectos
         if ($dependencia->proyectosServicioSocial()->exists()) {
-            $dependencia->update(['activa' => false]);
             return redirect()->route('dependencias.index')
-                ->with('success', 'Dependencia desactivada exitosamente.');
+                ->with('error', 'No se puede eliminar la dependencia porque tiene proyectos asociados.');
         }
 
         $dependencia->delete();
@@ -89,13 +91,13 @@ class DependenciaController extends Controller
             ->with('success', 'Dependencia eliminada exitosamente.');
     }
 
-    // Método para obtener dependencias activas (para select)
+    // API method para búsquedas AJAX
     public function activas()
     {
         $dependencias = Dependencia::activas()
-            ->orderBy('nombre_dependencia')
-            ->get(['id', 'nombre_dependencia']);
-
+            ->orderBy('nombre')  // CORREGIDO: era 'nombre_dependencia'
+            ->get(['id', 'nombre']);  // CORREGIDO: era 'nombre_dependencia'
+            
         return response()->json($dependencias);
     }
 }

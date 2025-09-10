@@ -6,35 +6,41 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        Schema::create('proyectos_servicio_social', function (Blueprint $table) {
+        // SOLO crear la tabla dependencias
+        Schema::create('dependencias', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('estudiante_id')->constrained('estudiantes')->onDelete('cascade');
-            $table->foreignId('dependencia_id')->constrained('dependencias');
-            $table->string('nombre_programa', 200);
-            $table->enum('modalidad', ['Externa', 'Interna']);
-            $table->date('fecha_inicio');
-            $table->date('fecha_terminacion');
-            $table->text('actividades_realizar');
-            $table->string('tipo_proyecto', 100);
-            $table->enum('estatus', ['Registrado', 'Aceptado', 'En Proceso', 'Terminado', 'Cancelado'])->default('Registrado');
-            $table->integer('horas_totales')->default(500);
-            $table->integer('horas_acumuladas')->default(0);
-            $table->string('departamento', 100)->default('DEPARTAMENTO DE SISTEMAS Y COMPUTACIÓN');
-            $table->string('numero_oficio', 50)->nullable();
-            
-            // Campos adicionales para las cartas
-            $table->date('fecha_carta_aceptacion')->nullable();
-            $table->date('fecha_carta_terminacion')->nullable();
-            $table->text('actividades_principales')->nullable(); // Para carta de terminación
-            
+            $table->string('nombre', 255);
+            $table->text('domicilio');
+            $table->string('titular', 150);
+            $table->string('cargo_titular', 100);
+            $table->string('responsable', 150)->nullable();
+            $table->string('cargo_responsable', 100)->nullable();
+            $table->string('telefono', 20)->nullable();
+            $table->string('email', 100)->nullable();
+            $table->string('municipio', 100);
+            $table->string('estado', 100);
+            $table->boolean('activa')->default(true);
             $table->timestamps();
+            
+            // Índices
+            $table->index('nombre');
+            $table->index('activa');
         });
+        
+        // NO DEBE HABER MÁS CÓDIGO AQUÍ
+        // NO CREAR LA TABLA proyectos_servicio_social AQUÍ
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        Schema::dropIfExists('proyectos_servicio_social');
+        Schema::dropIfExists('dependencias');
     }
 };

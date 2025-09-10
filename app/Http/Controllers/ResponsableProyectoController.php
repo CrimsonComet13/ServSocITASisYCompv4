@@ -6,19 +6,21 @@ use App\Models\ProyectoServicioSocial;
 use App\Models\ReporteBimestral;
 use App\Models\ReporteFinal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class ResponsableProyectoController extends Controller
 {
     public function dashboard()
     {
-        $responsable = auth()->user()->responsableProyecto;
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
         
         $stats = [
-            'proyectos_asignados' => $responsable->proyectosSupervisa()->count(),
-            'proyectos_en_proceso' => $responsable->proyectosSupervisa()->where('estatus', 'En Proceso')->count(),
-            'proyectos_terminados' => $responsable->proyectosSupervisa()->where('estatus', 'Terminado')->count(),
-            'reportes_pendientes' => 0, // Se implementará con reportes bimestrales
+            'proyectos_asignados'   => $responsable->proyectosSupervisa()->count(),
+            'proyectos_en_proceso'  => $responsable->proyectosSupervisa()->where('estatus', 'En Proceso')->count(),
+            'proyectos_terminados'  => $responsable->proyectosSupervisa()->where('estatus', 'Terminado')->count(),
+            'reportes_pendientes'   => 0, // Se implementará con reportes bimestrales
         ];
 
         $proyectosAsignados = $responsable->proyectosSupervisa()
@@ -39,7 +41,8 @@ class ResponsableProyectoController extends Controller
 
     public function misProyectos()
     {
-        $responsable = auth()->user()->responsableProyecto;
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
         
         $proyectos = $responsable->proyectosSupervisa()
             ->with(['estudiante'])
@@ -51,8 +54,7 @@ class ResponsableProyectoController extends Controller
 
     public function verProyecto(ProyectoServicioSocial $proyecto)
     {
-        // Verificar que este responsable pueda ver este proyecto
-        if (!auth()->user()->responsableProyecto->canEvaluateProject($proyecto)) {
+        if (!Auth::user()->responsableProyecto->canEvaluateProject($proyecto)) {
             abort(403, 'No tiene permisos para ver este proyecto.');
         }
 
@@ -63,8 +65,7 @@ class ResponsableProyectoController extends Controller
 
     public function evaluarProyecto(ProyectoServicioSocial $proyecto)
     {
-        // Verificar permisos
-        if (!auth()->user()->responsableProyecto->canEvaluateProject($proyecto)) {
+        if (!Auth::user()->responsableProyecto->canEvaluateProject($proyecto)) {
             abort(403, 'No tiene permisos para evaluar este proyecto.');
         }
 
@@ -75,8 +76,7 @@ class ResponsableProyectoController extends Controller
 
     public function guardarEvaluacion(Request $request, ProyectoServicioSocial $proyecto)
     {
-        // Verificar permisos
-        if (!auth()->user()->responsableProyecto->canEvaluateProject($proyecto)) {
+        if (!Auth::user()->responsableProyecto->canEvaluateProject($proyecto)) {
             abort(403, 'No tiene permisos para evaluar este proyecto.');
         }
 
@@ -88,9 +88,6 @@ class ResponsableProyectoController extends Controller
             'estatus' => 'required|in:Aceptado,En Proceso,Terminado',
         ]);
 
-        // Aquí se guardaría la evaluación en la tabla correspondiente
-        // Por ahora actualizamos el estatus del proyecto
-
         $proyecto->update([
             'estatus' => $validated['estatus']
         ]);
@@ -101,9 +98,9 @@ class ResponsableProyectoController extends Controller
 
     public function reportesBimestrales()
     {
-        $responsable = auth()->user()->responsableProyecto;
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
         
-        // Esta funcionalidad se implementará cuando creemos las migraciones de reportes
         $reportes = collect(); // Placeholder
 
         return view('responsable.reportes.bimestrales', compact('reportes'));
@@ -111,7 +108,69 @@ class ResponsableProyectoController extends Controller
 
     public function reportesFinales()
     {
-        $responsable = auth()->user()->responsableProyecto;
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
         
-        // Esta funcionalidad se implementará cuando creemos las migraciones de reportes
-        $reportes
+        $reportes = collect(); // Placeholder
+
+        return view('responsable.reportes.finales', compact('reportes'));
+    }
+
+    public function cambiarEstatusProyecto(Request $request, ProyectoServicioSocial $proyecto)
+    {
+        if (!Auth::user()->responsableProyecto->canEvaluateProject($proyecto)) {
+            abort(403, 'No tiene permisos para cambiar el estatus de este proyecto.');
+        }
+
+        $validated = $request->validate([
+            'estatus' => 'required|in:Aceptado,En Proceso,Terminado,Cancelado',
+            'observaciones' => 'nullable|string'
+        ]);
+
+        $estatusAnterior = $proyecto->estatus;
+        
+        if ($validated['estatus'] === 'Aceptado' && !$proyecto->fecha_carta_aceptacion) {
+            $proyecto->fecha_carta_aceptacion = Carbon::now()->toDateString();
+        }
+
+        if ($validated['estatus'] === 'Terminado') {
+            if (!$proyecto->fecha_carta_terminacion) {
+                $proyecto->fecha_carta_terminacion = Carbon::now()->toDateString();
+            }
+            if ($proyecto->horas_acumuladas < $proyecto->horas_totales) {
+                $proyecto->horas_acumuladas = $proyecto->horas_totales;
+            }
+        }
+
+        $proyecto->estatus = $validated['estatus'];
+        $proyecto->save();
+
+        return redirect()->route('responsable.proyectos.show', $proyecto)
+            ->with('success', "Estatus del proyecto cambiado de '{$estatusAnterior}' a '{$validated['estatus']}' exitosamente.");
+    }
+
+    public function perfil()
+    {
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
+        
+        return view('responsable.perfil', compact('responsable'));
+    }
+
+    public function actualizarPerfil(Request $request)
+    {
+        /** @var \App\Models\ResponsableProyecto $responsable */
+        $responsable = Auth::user()->responsableProyecto;
+        
+        $validated = $request->validate([
+            'nombre_completo' => 'required|string|max:255',
+            'cargo' => 'required|string|max:255',
+            'telefono' => 'nullable|string|max:15',
+            'email_institucional' => 'nullable|email|max:255',
+        ]);
+
+        $responsable->update($validated);
+
+        return back()->with('success', 'Perfil actualizado exitosamente.');
+    }
+}

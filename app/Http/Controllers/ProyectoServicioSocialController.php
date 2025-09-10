@@ -29,7 +29,7 @@ class ProyectoServicioSocialController extends Controller
     public function create()
     {
         $estudiantes = Estudiante::orderBy('apellido_paterno')->get();
-        $dependencias = Dependencia::activas()->orderBy('nombre_dependencia')->get();
+        $dependencias = Dependencia::activas()->orderBy('nombre')->get();
         
         return view('proyectos.create', compact('estudiantes', 'dependencias'));
     }
@@ -65,7 +65,7 @@ class ProyectoServicioSocialController extends Controller
     public function edit(ProyectoServicioSocial $proyecto)
     {
         $estudiantes = Estudiante::orderBy('apellido_paterno')->get();
-        $dependencias = Dependencia::activas()->orderBy('nombre_dependencia')->get();
+        $dependencias = Dependencia::activas()->orderBy('nombre')->get();
         
         return view('proyectos.edit', compact('proyecto', 'estudiantes', 'dependencias'));
     }

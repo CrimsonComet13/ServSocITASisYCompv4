@@ -10,12 +10,14 @@ class Dependencia extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nombre_dependencia',
-        'domicilio_dependencia',
-        'titular_dependencia',
+        'nombre',           // CORREGIDO: era 'nombre_dependencia'
+        'domicilio',        
+        'titular',          
         'cargo_titular',
-        'responsable_proyecto',
+        'responsable',      
         'cargo_responsable',
+        'telefono',
+        'email',
         'municipio',
         'estado',
         'activa'
@@ -25,15 +27,31 @@ class Dependencia extends Model
         'activa' => 'boolean',
     ];
 
-    // Relación con proyectos de servicio social
+    // Relaciones
     public function proyectosServicioSocial()
     {
         return $this->hasMany(ProyectoServicioSocial::class);
     }
 
-    // Scope para dependencias activas
+    public function usuarios()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function responsablesProyecto()
+    {
+        return $this->hasMany(ResponsableProyecto::class);
+    }
+
+    // Scopes
     public function scopeActivas($query)
     {
         return $query->where('activa', true);
+    }
+
+    // Accessors
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} - {$this->titular}";
     }
 }
