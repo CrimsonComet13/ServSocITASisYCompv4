@@ -5,6 +5,7 @@ use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\DependenciaController;
 use App\Http\Controllers\ProyectoServicioSocialController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\PDFController; // NUEVO CONTROLADOR
 use App\Http\Controllers\JefeDepartamentoController;
 use App\Http\Controllers\ResponsableProyectoController;
 use App\Http\Controllers\EstudianteDashboardController;
@@ -71,6 +72,11 @@ Route::middleware(['auth', 'jefe.departamento'])->prefix('jefe')->name('jefe.')-
     Route::resource('estudiantes', EstudianteController::class);
     Route::resource('dependencias', DependenciaController::class);
     Route::resource('proyectos-completos', ProyectoServicioSocialController::class);
+    
+    // Documentos PDF - Acceso completo para jefe
+    Route::get('/documentos/{proyecto}', function($proyecto) {
+        return view('jefe.documentos-proyecto', compact('proyecto'));
+    })->name('documentos-proyecto');
 });
 
 /*
@@ -91,6 +97,11 @@ Route::middleware(['auth', 'responsable.proyecto'])->prefix('responsable')->name
     // Reportes
     Route::get('/reportes/bimestrales', [ResponsableProyectoController::class, 'reportesBimestrales'])->name('reportes.bimestrales');
     Route::get('/reportes/finales', [ResponsableProyectoController::class, 'reportesFinales'])->name('reportes.finales');
+    
+    // Documentos PDF - Solo proyectos de su dependencia
+    Route::get('/documentos/{proyecto}', function($proyecto) {
+        return view('responsable.documentos-proyecto', compact('proyecto'));
+    })->name('documentos-proyecto');
     
     // Perfil
     Route::get('/perfil', [ResponsableProyectoController::class, 'perfil'])->name('perfil');
@@ -113,6 +124,9 @@ Route::middleware(['auth', 'estudiante'])->prefix('estudiante')->name('estudiant
     
     // Documentos
     Route::get('/documentos', [EstudianteDashboardController::class, 'documentos'])->name('documentos');
+    Route::get('/mis-documentos', function() {
+        return view('estudiante.mis-documentos');
+    })->name('mis-documentos');
     
     // Reportes
     Route::get('/reportes', [EstudianteDashboardController::class, 'reportes'])->name('reportes');
@@ -127,11 +141,40 @@ Route::middleware(['auth', 'estudiante'])->prefix('estudiante')->name('estudiant
 
 /*
 |--------------------------------------------------------------------------
-| Rutas para documentos PDF (accesibles por múltiples roles)
+| Rutas para Generar PDFs (Nuevas - Accesibles por todos los roles autenticados)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('pdf')->name('pdf.')->group(function () {
+    
+    // Carta de Aceptación - Accesible por todos los roles
+    Route::get('/carta-aceptacion/{proyecto}', [PDFController::class, 'cartaAceptacion'])
+        ->name('carta-aceptacion');
+    
+    // Carta de Terminación - Solo proyectos terminados
+    Route::get('/carta-terminacion/{proyecto}', [PDFController::class, 'cartaTerminacion'])
+        ->name('carta-terminacion');
+    
+    // Solicitud de Servicio Social - Formulario oficial
+    Route::get('/solicitud-servicio-social/{proyecto}', [PDFController::class, 'solicitudServicioSocial'])
+        ->name('solicitud-servicio-social');
+    
+    // Reporte Bimestral - Con número de bimestre
+    Route::get('/reporte-bimestral/{proyecto}/{bimestre?}', [PDFController::class, 'reporteBimestral'])
+        ->name('reporte-bimestral')
+        ->where('bimestre', '[1-3]'); // Solo bimestres 1, 2, 3
+    
+    // Reporte Final
+    Route::get('/reporte-final/{proyecto}', [PDFController::class, 'reporteFinal'])
+        ->name('reporte-final');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rutas para documentos PDF existentes (Mantenemos compatibilidad)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:jefe_departamento,responsable_proyecto,estudiante'])->prefix('documentos')->name('documentos.')->group(function () {
-    // Generar PDFs
+    // Generar PDFs (usando el controlador existente)
     Route::get('/proyecto/{proyecto}/carta-aceptacion', [DocumentoController::class, 'cartaAceptacion'])
         ->name('carta-aceptacion');
     
@@ -158,6 +201,18 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
     
     Route::get('/dependencias/activas', [DependenciaController::class, 'activas'])
         ->name('dependencias.activas');
+        
+    // Nueva API para verificar disponibilidad de documentos
+    Route::get('/proyecto/{proyecto}/documentos-disponibles', function($proyecto) {
+        $proyecto = \App\Models\ProyectoServicioSocial::findOrFail($proyecto);
+        return response()->json([
+            'carta_aceptacion' => in_array($proyecto->estatus, ['Aceptado', 'En Proceso', 'Terminado']),
+            'carta_terminacion' => $proyecto->estatus === 'Terminado',
+            'solicitud_servicio' => true,
+            'reporte_bimestral' => in_array($proyecto->estatus, ['En Proceso', 'Terminado']),
+            'reporte_final' => $proyecto->estatus === 'Terminado'
+        ]);
+    })->name('proyecto.documentos-disponibles');
 });
 
 /*
