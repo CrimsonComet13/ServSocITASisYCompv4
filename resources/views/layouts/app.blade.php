@@ -190,10 +190,20 @@
                                 ['name' => 'Usuarios', 'route' => 'jefe.usuarios', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z'],
                                 ['name' => 'Estudiantes', 'route' => 'jefe.estudiantes.index', 'icon' => 'M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'],
                                 ['name' => 'Dependencias', 'route' => 'jefe.dependencias.index', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-                                ['name' => 'Proyectos', 'route' => 'jefe.proyectos', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-                                ['name' => 'Reportes', 'route' => 'jefe.reportes', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                                ['name' => 'Todos los Proyectos', 'route' => 'jefe.proyectos', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                                ['name' => 'Coordinación SS', 'route' => 'jefe.coordinacion', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
+                                ['name' => 'Reportes Generales', 'route' => 'jefe.reportes', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
                             ];
                         } elseif (auth()->user()->isResponsableProyecto()) {
+                            $menuItems = [
+                                ['name' => 'Dashboard', 'route' => 'responsable.dashboard', 'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z'],
+                                ['name' => 'Mis Proyectos', 'route' => 'responsable.proyectos.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                                ['name' => 'Laboratorio', 'route' => 'responsable.laboratorio', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
+                                ['name' => 'Seguimiento', 'route' => 'responsable.seguimiento', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                                ['name' => 'Reportes Bimestrales', 'route' => 'responsable.reportes.bimestrales', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                                ['name' => 'Reportes Finales', 'route' => 'responsable.reportes.finales', 'icon' => 'M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2'],
+                            ];
+                        } elseif (auth()->user()->isEstudiante()) {
                             $menuItems = [
                                 ['name' => 'Dashboard', 'route' => 'responsable.dashboard', 'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z'],
                                 ['name' => 'Mis Proyectos', 'route' => 'responsable.proyectos.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
@@ -214,12 +224,19 @@
                     @foreach($menuItems as $item)
                         <li>
                             <a href="{{ route($item['route']) }}" 
-                               class="flex items-center p-2 text-gray-300 rounded-lg hover:bg-gray-700 group {{ request()->routeIs($item['route']) ? 'bg-blue-600 text-white' : '' }}">
-                                <svg class="w-5 h-5 text-gray-400 transition duration-75 group-hover:text-white {{ request()->routeIs($item['route']) ? 'text-white' : '' }}" 
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path>
-                                </svg>
-                                <span class="ml-3">{{ $item['name'] }}</span>
+                               class="flex items-center justify-between p-2 text-gray-300 rounded-lg hover:bg-gray-700 group {{ request()->routeIs($item['route']) ? 'bg-blue-600 text-white' : '' }}">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-400 transition duration-75 group-hover:text-white {{ request()->routeIs($item['route']) ? 'text-white' : '' }}" 
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path>
+                                    </svg>
+                                    <span class="ml-3">{{ $item['name'] }}</span>
+                                </div>
+                                @if(isset($item['badge']))
+                                    <span class="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-medium">
+                                        {{ $item['badge'] }}
+                                    </span>
+                                @endif
                             </a>
                         </li>
                     @endforeach

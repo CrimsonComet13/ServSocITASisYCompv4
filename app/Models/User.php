@@ -51,7 +51,7 @@ class User extends Authenticatable
         return $this->hasOne(ResponsableProyecto::class);
     }
 
-    // Métodos de roles
+    // Métodos de roles simplificados
     public function isJefeDepartamento()
     {
         return $this->role === 'jefe_departamento';
@@ -92,12 +92,53 @@ class User extends Authenticatable
     public function getRoleNameAttribute()
     {
         $roles = [
-            'jefe_departamento' => 'Jefe de Departamento',
-            'responsable_proyecto' => 'Responsable de Proyecto', 
+            'jefe_departamento' => 'Jefe de Departamento / Coordinador de Servicio Social',
+            'responsable_proyecto' => 'Jefe de Laboratorio / Responsable de Proyecto', 
             'estudiante' => 'Estudiante'
         ];
 
         return $roles[$this->role] ?? 'Sin Rol';
+    }
+
+    // Permisos según rol actualizado con flexibilidad administrativa
+    public function canManageUsers()
+    {
+        return $this->isJefeDepartamento(); // Solo jefe departamento puede gestionar usuarios
+    }
+
+    public function canViewAllProjects()
+    {
+        return $this->isJefeDepartamento(); // Jefe departamento siempre ve todos los proyectos
+    }
+
+    public function canGenerateReports()
+    {
+        return $this->isJefeDepartamento() || $this->isResponsableProyecto(); // Ambos pueden generar reportes
+    }
+
+    public function canApproveProjects()
+    {
+        return $this->isJefeDepartamento(); // Solo jefe departamento aprueba proyectos
+    }
+
+    public function canSuperviseProjects()
+    {
+        return $this->isResponsableProyecto() || $this->isJefeDepartamento(); // Ambos pueden supervisar
+    }
+
+    public function canAccessLaboratoryFunctions()
+    {
+        return $this->isResponsableProyecto() || $this->isJefeDepartamento(); // Jefe puede asumir funciones de laboratorio
+    }
+
+    public function canEvaluateReports()
+    {
+        return $this->isResponsableProyecto() || $this->isJefeDepartamento(); // Ambos pueden evaluar reportes
+    }
+
+    public function canFinalizeProjects()
+    {
+        return $this->isResponsableProyecto() || $this->isJefeDepartamento(); // Ambos pueden finalizar proyectos
     }
 
     // Actualizar último acceso
@@ -110,7 +151,7 @@ class User extends Authenticatable
     public function canAccessProject($proyecto)
     {
         if ($this->isJefeDepartamento()) {
-            return true; // Jefe puede acceder a todos
+            return true; // Jefe departamento puede acceder a todos
         }
 
         if ($this->isResponsableProyecto()) {

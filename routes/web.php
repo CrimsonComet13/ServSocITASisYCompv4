@@ -1,4 +1,9 @@
-<?php
+/*
+|--------------------------------------------------------------------------
+| Rutas para Jefe de Laboratorio / Coordinador de Servicio Social
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'jefe.laboratorio'])->prefix<?php
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EstudianteController;
@@ -64,6 +69,22 @@ Route::middleware(['auth', 'jefe.departamento'])->prefix('jefe')->name('jefe.')-
     Route::get('/reportes', [JefeDepartamentoController::class, 'reportes'])->name('reportes');
     Route::get('/proyectos', [JefeDepartamentoController::class, 'proyectos'])->name('proyectos');
     Route::get('/dependencias', [JefeDepartamentoController::class, 'dependencias'])->name('dependencias');
+    
+    // Coordinación de Servicio Social
+    Route::get('/coordinacion', [JefeDepartamentoController::class, 'coordinacion'])->name('coordinacion');
+    
+    // Modo Laboratorio - Funciones especiales cuando el jefe asume rol de laboratorio
+    Route::get('/modo-laboratorio', function() {
+        return view('jefe.modo-laboratorio');
+    })->name('modo-laboratorio');
+    
+    // Funciones de laboratorio para el jefe (cuando sea necesario)
+    Route::prefix('laboratorio')->name('lab.')->group(function () {
+        Route::post('/aprobar-proyecto/{proyecto}', [JefeDepartamentoController::class, 'aprobarProyectoComoLab'])->name('aprobar-proyecto');
+        Route::post('/evaluar-reporte/{proyecto}', [JefeDepartamentoController::class, 'evaluarReporteComoLab'])->name('evaluar-reporte');
+        Route::post('/finalizar-proyecto/{proyecto}', [JefeDepartamentoController::class, 'finalizarProyectoComoLab'])->name('finalizar-proyecto');
+        Route::get('/supervisar-estudiantes', [JefeDepartamentoController::class, 'supervisarEstudiantesComoLab'])->name('supervisar-estudiantes');
+    });
     
     // Configuración
     Route::get('/configuracion', [JefeDepartamentoController::class, 'configuracion'])->name('configuracion');

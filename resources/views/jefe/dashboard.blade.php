@@ -8,7 +8,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
             <h1 class="text-3xl font-bold text-white">Dashboard</h1>
-            <p class="text-gray-400">Panel de control - Jefe de Departamento</p>
+            <p class="text-gray-400">Jefe de Departamento / Coordinador de Servicio Social</p>
         </div>
         <div class="flex items-center space-x-3">
             <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">
